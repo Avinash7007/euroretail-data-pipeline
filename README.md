@@ -15,7 +15,9 @@ A **hands-on, end-to-end data pipeline** built as part of my upskilling journey 
 Instead of following tutorials, I designed and built a production-style pipeline from scratch using real-world retail data — covering ingestion, transformation, and reporting layers.
 
 **Author:** Avinash Dubey — Data Analyst (3 YOE), upskilling in Cloud Data Engineering  
-**Connect:** [LinkedIn](https://linkedin.com/in/your-profile)
+**Connect:** [LinkedIn](https://www.linkedin.com/in/avinash7007/)
+<br>
+**email** dubeyavinash157@gmail.com
 
 ---
 
