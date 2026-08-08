@@ -1,12 +1,19 @@
-# Virtual Environment
+# Python / virtual environments
 .venv/
-
-# Python cache
+venv/
 __pycache__/
 *.py[cod]
 
-# Environment variables
+# Environment / credentials
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+aws-credentials*
 
 # Jupyter
 .ipynb_checkpoints/
@@ -17,3 +24,9 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Local Snowflake / cloud tooling state
+.snowflake/
+.terraform/
+*.tfstate
+*.tfstate.*
