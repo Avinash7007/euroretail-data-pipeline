@@ -1,0 +1,53 @@
+name: Repository Checks
+
+on:
+  push:
+    branches: [main, production-hardening]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate project structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_files=(
+            README.md
+            docs/architecture.md
+            sql/01_raw/01_storage_integration.sql
+            sql/01_raw/02_database_setup.sql
+            sql/01_raw/03_file_format_stage.sql
+            sql/01_raw/04_raw_tables.sql
+            sql/01_raw/05_load_data.sql
+            sql/01_raw/06_verify.sql
+            sql/02_staging/01_staging_views.sql
+            sql/02_staging/02_data_quality_checks.sql
+            sql/03_reporting/01_reporting_views.sql
+          )
+          for file in "${required_files[@]}"; do
+            test -f "$file" || { echo "Missing required file: $file"; exit 1; }
+          done
+
+      - name: Check for common AWS secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE --exclude-dir=.git --exclude='repo-checks.yml' \
+              'AKIA[0-9A-Z]{16}|aws_secret_access_key[[:space:]]*=' .; then
+            echo "Potential AWS credential detected in tracked files."
+            exit 1
+          fi
+
+      - name: Check Snowflake integration placeholders
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '<AWS_ACCOUNT_ID>' sql/01_raw/01_storage_integration.sql
+          grep -q '<IAM_ROLE_NAME>' sql/01_raw/01_storage_integration.sql
