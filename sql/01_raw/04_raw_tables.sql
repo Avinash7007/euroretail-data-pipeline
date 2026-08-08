@@ -1,23 +1,18 @@
 -- ============================================================
---  04_raw_tables.sql
---  STEP 4: Create All 7 RAW Tables
---  Run as: ACCOUNTADMIN
+-- 04_raw_tables.sql
+-- STEP 4: Create / reconcile all RAW tables
+-- Role: SYSADMIN
 --
---  Design Decision: ALL columns are STRING.
---  Raw layer preserves data exactly as received from S3.
---  Type casting happens in STAGING only — zero silent data loss.
+-- RAW is source-aligned: values remain STRING and are not transformed.
+-- CREATE OR ALTER avoids destructive DROP + CREATE deployments.
 -- ============================================================
 
-USE ROLE ACCOUNTADMIN;
+USE ROLE SYSADMIN;
 USE DATABASE EURORETAIL_DB;
 USE SCHEMA RAW;
 USE WAREHOUSE EURORETAIL_WH;
 
--- ------------------------------------------------------------
--- DIMENSION TABLES
--- ------------------------------------------------------------
-
-CREATE OR REPLACE TABLE RAW.DIM_CUSTOMER (
+CREATE OR ALTER TABLE RAW.DIM_CUSTOMER (
     CUSTOMER_ID   STRING,
     CUSTOMER_NAME STRING,
     SEGMENT       STRING,
@@ -26,21 +21,21 @@ CREATE OR REPLACE TABLE RAW.DIM_CUSTOMER (
     COUNTRY       STRING
 );
 
-CREATE OR REPLACE TABLE RAW.DIM_DATE (
+CREATE OR ALTER TABLE RAW.DIM_DATE (
     DATE    STRING,
     YEAR    STRING,
     MONTH   STRING,
     QUARTER STRING
 );
 
-CREATE OR REPLACE TABLE RAW.DIM_PRODUCT (
+CREATE OR ALTER TABLE RAW.DIM_PRODUCT (
     PRODUCT_ID   STRING,
     PRODUCT_NAME STRING,
     CATEGORY     STRING,
     SUB_CATEGORY STRING
 );
 
-CREATE OR REPLACE TABLE RAW.DIM_STORE (
+CREATE OR ALTER TABLE RAW.DIM_STORE (
     STORE_ID   STRING,
     STORE_NAME STRING,
     CITY       STRING,
@@ -48,11 +43,7 @@ CREATE OR REPLACE TABLE RAW.DIM_STORE (
     COUNTRY    STRING
 );
 
--- ------------------------------------------------------------
--- FACT TABLES
--- ------------------------------------------------------------
-
-CREATE OR REPLACE TABLE RAW.FACT_SALES (
+CREATE OR ALTER TABLE RAW.FACT_SALES (
     ORDER_ID        STRING,
     ORDER_DATE      STRING,
     CUSTOMER_ID     STRING,
@@ -65,7 +56,7 @@ CREATE OR REPLACE TABLE RAW.FACT_SALES (
     TOTAL_COST      STRING
 );
 
-CREATE OR REPLACE TABLE RAW.FACT_RETURNS (
+CREATE OR ALTER TABLE RAW.FACT_RETURNS (
     RETURN_ID     STRING,
     ORDER_ID      STRING,
     PRODUCT_ID    STRING,
@@ -74,7 +65,7 @@ CREATE OR REPLACE TABLE RAW.FACT_RETURNS (
     REFUND_AMOUNT STRING
 );
 
-CREATE OR REPLACE TABLE RAW.FACT_SHIPMENTS (
+CREATE OR ALTER TABLE RAW.FACT_SHIPMENTS (
     SHIPMENT_ID     STRING,
     ORDER_ID        STRING,
     SHIP_DATE       STRING,
