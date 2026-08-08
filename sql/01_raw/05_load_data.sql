@@ -1,57 +1,64 @@
 -- ============================================================
---  05_load_data.sql
---  STEP 5: Load Data — S3 → RAW Tables via COPY INTO
---  Run as: ACCOUNTADMIN
+-- 05_load_data.sql
+-- STEP 5: S3 -> RAW via COPY INTO
+-- Role: SYSADMIN
 --
---  ON_ERROR = CONTINUE:
---  Skips bad rows and continues loading.
---  All errors are logged in LOAD_HISTORY — nothing silently dropped.
+-- Production behavior:
+-- * ON_ERROR = ABORT_STATEMENT: bad data fails the load visibly.
+-- * FORCE = FALSE: already loaded files are not reloaded.
+-- * PURGE = FALSE: source files remain in S3 as the system of record.
 -- ============================================================
 
-USE ROLE ACCOUNTADMIN;
+USE ROLE SYSADMIN;
 USE DATABASE EURORETAIL_DB;
 USE SCHEMA RAW;
 USE WAREHOUSE EURORETAIL_WH;
 
--- ------------------------------------------------------------
--- DIMENSION TABLES
--- ------------------------------------------------------------
-
 COPY INTO RAW.DIM_CUSTOMER
-    FROM @EURORETAIL_DB.RAW.RAW_STAGE/dim_customer.csv
-    FILE_FORMAT = EURORETAIL_DB.RAW.CSV_FORMAT
-    ON_ERROR    = 'CONTINUE';
+FROM @EURORETAIL_DB.RAW.RAW_STAGE/dim_customer.csv
+FILE_FORMAT = (FORMAT_NAME = 'EURORETAIL_DB.RAW.CSV_FORMAT')
+ON_ERROR = 'ABORT_STATEMENT'
+FORCE = FALSE
+PURGE = FALSE;
 
 COPY INTO RAW.DIM_DATE
-    FROM @EURORETAIL_DB.RAW.RAW_STAGE/dim_date.csv
-    FILE_FORMAT = EURORETAIL_DB.RAW.CSV_FORMAT
-    ON_ERROR    = 'CONTINUE';
+FROM @EURORETAIL_DB.RAW.RAW_STAGE/dim_date.csv
+FILE_FORMAT = (FORMAT_NAME = 'EURORETAIL_DB.RAW.CSV_FORMAT')
+ON_ERROR = 'ABORT_STATEMENT'
+FORCE = FALSE
+PURGE = FALSE;
 
 COPY INTO RAW.DIM_PRODUCT
-    FROM @EURORETAIL_DB.RAW.RAW_STAGE/dim_product.csv
-    FILE_FORMAT = EURORETAIL_DB.RAW.CSV_FORMAT
-    ON_ERROR    = 'CONTINUE';
+FROM @EURORETAIL_DB.RAW.RAW_STAGE/dim_product.csv
+FILE_FORMAT = (FORMAT_NAME = 'EURORETAIL_DB.RAW.CSV_FORMAT')
+ON_ERROR = 'ABORT_STATEMENT'
+FORCE = FALSE
+PURGE = FALSE;
 
 COPY INTO RAW.DIM_STORE
-    FROM @EURORETAIL_DB.RAW.RAW_STAGE/dim_store.csv
-    FILE_FORMAT = EURORETAIL_DB.RAW.CSV_FORMAT
-    ON_ERROR    = 'CONTINUE';
-
--- ------------------------------------------------------------
--- FACT TABLES
--- ------------------------------------------------------------
+FROM @EURORETAIL_DB.RAW.RAW_STAGE/dim_store.csv
+FILE_FORMAT = (FORMAT_NAME = 'EURORETAIL_DB.RAW.CSV_FORMAT')
+ON_ERROR = 'ABORT_STATEMENT'
+FORCE = FALSE
+PURGE = FALSE;
 
 COPY INTO RAW.FACT_SALES
-    FROM @EURORETAIL_DB.RAW.RAW_STAGE/fact_sales.csv
-    FILE_FORMAT = EURORETAIL_DB.RAW.CSV_FORMAT
-    ON_ERROR    = 'CONTINUE';
+FROM @EURORETAIL_DB.RAW.RAW_STAGE/fact_sales.csv
+FILE_FORMAT = (FORMAT_NAME = 'EURORETAIL_DB.RAW.CSV_FORMAT')
+ON_ERROR = 'ABORT_STATEMENT'
+FORCE = FALSE
+PURGE = FALSE;
 
 COPY INTO RAW.FACT_RETURNS
-    FROM @EURORETAIL_DB.RAW.RAW_STAGE/fact_returns.csv
-    FILE_FORMAT = EURORETAIL_DB.RAW.CSV_FORMAT
-    ON_ERROR    = 'CONTINUE';
+FROM @EURORETAIL_DB.RAW.RAW_STAGE/fact_returns.csv
+FILE_FORMAT = (FORMAT_NAME = 'EURORETAIL_DB.RAW.CSV_FORMAT')
+ON_ERROR = 'ABORT_STATEMENT'
+FORCE = FALSE
+PURGE = FALSE;
 
 COPY INTO RAW.FACT_SHIPMENTS
-    FROM @EURORETAIL_DB.RAW.RAW_STAGE/fact_shipments.csv
-    FILE_FORMAT = EURORETAIL_DB.RAW.CSV_FORMAT
-    ON_ERROR    = 'CONTINUE';
+FROM @EURORETAIL_DB.RAW.RAW_STAGE/fact_shipments.csv
+FILE_FORMAT = (FORMAT_NAME = 'EURORETAIL_DB.RAW.CSV_FORMAT')
+ON_ERROR = 'ABORT_STATEMENT'
+FORCE = FALSE
+PURGE = FALSE;
