@@ -1,64 +1,98 @@
 # Architecture & Design Decisions
 
-## Overview
+## End-to-End Flow
 
-This pipeline follows a **3-layer medallion architecture** inside Snowflake:
-
-```
-S3 → RAW → STAGING → REPORTING → Power BI
-```
-
-Each layer has one clear responsibility. Data flows in one direction only.
-
----
-
-## Layer 1 — RAW
-
-**Purpose:** Ingest from S3 exactly as-is. Zero transformations.
-
-**Rules:**
-- All columns are `STRING` — no type casting at this stage
-- `ON_ERROR = CONTINUE` — bad rows are skipped and logged, not dropped
-- Raw tables are the source of truth for debugging
-
-**Why STRING columns?**
-If a source file has a bad value like `"29-Feb-2023"` and we cast directly to `DATE`, the row silently drops or the entire load fails. STRING columns in RAW mean we always have the original value to debug against. Casting happens in STAGING with full visibility.
-
----
-
-## Layer 2 — STAGING *(coming soon)*
-
-Planned:
-- Cast STRING columns to proper types (DATE, NUMBER, INTEGER)
-- NULL handling with business rules
-- Surrogate key generation
-- Business logic (net sales after discount, etc.)
-
----
-
-## Layer 3 — REPORTING *(coming soon)*
-
-Planned:
-- Aggregated views for Power BI
-- KPIs: Revenue, Returns Rate, Delivery Status
-- Star schema optimised for DAX queries
-
----
-
-## AWS + Snowflake Integration
-
-```
-Snowflake → assumes → IAM Role (snowflake-aws-role)
-                           ↓
-                     reads S3 (euro-retails/raw/)
+```text
+AWS S3
+  │
+  │ Snowflake Storage Integration
+  ▼
+RAW
+  │  source-aligned STRING values
+  │  fail-fast COPY INTO
+  ▼
+STAGING
+  │  TRY_* type conversion
+  │  normalization
+  │  deterministic keys
+  │  data-quality assertions
+  ▼
+REPORTING
+  │  business metrics and aggregates
+  ▼
+Power BI / SQL consumers
 ```
 
-**Critical:** Every `CREATE OR REPLACE STORAGE INTEGRATION` generates a new `STORAGE_AWS_EXTERNAL_ID`. AWS Trust Policy must be updated with this new value every time — otherwise the stage silently fails.
+The pipeline follows a layered ELT design. Each layer has a single responsibility and downstream consumers do not query the raw landing tables directly.
 
----
+## RAW Layer
+
+**Purpose:** Preserve the source representation from S3.
+
+- Seven source-aligned tables.
+- String-based ingestion prevents source formatting problems from becoming irreversible transformations.
+- `COPY INTO` uses `ON_ERROR = 'ABORT_STATEMENT'` so malformed files fail visibly.
+- `FORCE = FALSE` prevents already-loaded files from being reloaded during normal reruns.
+- Source files remain in S3; Snowflake is not configured to purge them after load.
+
+## STAGING Layer
+
+**Purpose:** Convert source-aligned values into analytics-ready types without modifying RAW.
+
+- `TRY_TO_DATE`, `TRY_TO_NUMBER`, and `TRY_TO_DECIMAL` handle conversion safely.
+- Empty strings are normalized to NULL.
+- Deterministic SHA-256 keys are generated for core dimensions/facts.
+- Data-quality checks cover required identifiers, dates, numeric fields, and key references.
+
+## REPORTING Layer
+
+**Purpose:** Provide stable, narrow interfaces for BI and analytical consumers.
+
+Current reporting views:
+
+- `DAILY_SALES`
+- `CUSTOMER_SALES`
+- `PRODUCT_PERFORMANCE`
+- `RETURNS_SUMMARY`
+- `DELIVERY_PERFORMANCE`
+- `EXECUTIVE_KPIS`
+
+Views are used for this project because the reporting layer is primarily a semantic/consumption layer. Physical tables or incremental models can be introduced later if workload size or latency requires them.
+
+## AWS + Snowflake Security
+
+Snowflake Storage Integration delegates access to an AWS IAM role instead of storing AWS access keys in SQL. The S3 location is restricted to the `s3://euro-retails/raw/` prefix. citeturn0search0turn0search5
+
+The integration script deliberately uses `CREATE STORAGE INTEGRATION IF NOT EXISTS`. After the integration exists, configuration changes should use `ALTER STORAGE INTEGRATION`; Snowflake warns that `CREATE OR REPLACE STORAGE INTEGRATION` recreates the object and can break stage associations. citeturn1search0turn1search2
+
+## Deployment Safety
+
+Snowflake's `CREATE OR ALTER` syntax is used for objects where supported because it provides a declarative, rerunnable deployment pattern while preserving existing object state where possible. citeturn1search3turn3search0
+
+The pipeline is therefore designed around:
+
+1. **Idempotent infrastructure** — rerunning DDL should not destroy loaded RAW data.
+2. **Fail-fast ingestion** — malformed source data is not silently accepted.
+3. **Immutable source retention** — S3 remains the recoverable landing source.
+4. **Quality gates** — STAGING promotion is checked before reporting consumption.
+5. **Separation of concerns** — ingestion, transformation, validation and reporting are separate SQL deployments.
 
 ## Cost Management
 
-Warehouse: `XSMALL` with `AUTO_SUSPEND = 60s`
+The warehouse is XSMALL with a 60-second auto-suspend and auto-resume enabled. The project is intentionally sized for development/portfolio workloads; production sizing should be driven by concurrency, query duration and workload volume.
 
-Auto-suspend ensures the warehouse stops after 60 seconds of inactivity — preventing idle credit burn between pipeline runs.
+## Operational Runbook
+
+```text
+1. Validate AWS IAM trust + S3 permissions.
+2. Create / validate S3_INT.
+3. Create database, warehouse and schemas.
+4. Create CSV format and external stage.
+5. Create RAW tables.
+6. COPY source files into RAW.
+7. Run 06_verify.sql.
+8. Build STAGING views.
+9. Run data-quality checks; investigate FAIL rows.
+10. Build REPORTING views.
+11. Connect BI consumers to REPORTING only.
+```
