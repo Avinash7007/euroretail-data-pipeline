@@ -170,5 +170,8 @@ The project uses an XSMALL warehouse with auto-resume and 60-second auto-suspend
 
 **Avinash Dubey — Data Analyst | Cloud Data Engineering**
 
-- LinkedIn: https://www.linkedin.com/in/avinash7007/
-- GitHub: https://github.com/Avinash7007
+- 📧 Email: [dubeyavinash157@gmail.com](mailto:dubeyavinash157@gmail.com)
+- 💼 LinkedIn: [linkedin.com/in/avinash7007](https://www.linkedin.com/in/avinash7007/)
+- 🌐 Portfolio: [avinash7007.github.io/avinash-portfolio](https://avinash7007.github.io/avinash-portfolio/)
+- 💻 GitHub: [github.com/Avinash7007](https://github.com/Avinash7007)
+
