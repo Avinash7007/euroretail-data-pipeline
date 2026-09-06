@@ -61,13 +61,13 @@ Views are used for this project because the reporting layer is primarily a seman
 
 ## AWS + Snowflake Security
 
-Snowflake Storage Integration delegates access to an AWS IAM role instead of storing AWS access keys in SQL. The S3 location is restricted to the `s3://euro-retails/raw/` prefix. citeturn0search0turn0search5
+Snowflake Storage Integration delegates access to an AWS IAM role instead of storing AWS access keys in SQL. The S3 location is restricted to the `s3://euro-retails/raw/` prefix.
 
-The integration script deliberately uses `CREATE STORAGE INTEGRATION IF NOT EXISTS`. After the integration exists, configuration changes should use `ALTER STORAGE INTEGRATION`; Snowflake warns that `CREATE OR REPLACE STORAGE INTEGRATION` recreates the object and can break stage associations. citeturn1search0turn1search2
+The integration script deliberately uses `CREATE STORAGE INTEGRATION IF NOT EXISTS`. After the integration exists, configuration changes should use `ALTER STORAGE INTEGRATION`; Snowflake warns that `CREATE OR REPLACE STORAGE INTEGRATION` recreates the object and can break stage associations.
 
 ## Deployment Safety
 
-Snowflake's `CREATE OR ALTER` syntax is used for objects where supported because it provides a declarative, rerunnable deployment pattern while preserving existing object state where possible. citeturn1search3turn3search0
+Snowflake's `CREATE OR ALTER` syntax is used for objects where supported because it provides a declarative, rerunnable deployment pattern while preserving existing object state where possible.
 
 The pipeline is therefore designed around:
 

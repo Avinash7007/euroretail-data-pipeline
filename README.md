@@ -33,7 +33,7 @@ Snowflake REPORTING
 Power BI / SQL consumers
 ```
 
-Snowflake Storage Integration is used instead of hard-coded AWS access keys. Snowflake recommends storage integrations for secure S3 access because credentials do not need to be embedded in stage or load statements. citeturn0search0turn0search5
+Snowflake Storage Integration is used instead of hard-coded AWS access keys. Snowflake recommends storage integrations for secure S3 access because credentials do not need to be embedded in stage or load statements.
 
 ## Project Structure
 
@@ -87,11 +87,11 @@ The reporting layer provides `DAILY_SALES`, `CUSTOMER_SALES`, `PRODUCT_PERFORMAN
 
 ### 1. Secure S3 access
 
-The pipeline uses a Snowflake **Storage Integration + AWS IAM role** rather than embedding AWS access keys. The allowed S3 path is restricted to the project landing prefix. citeturn0search0turn1search0
+The pipeline uses a Snowflake **Storage Integration + AWS IAM role** rather than embedding AWS access keys. The allowed S3 path is restricted to the project landing prefix.
 
 ### 2. Non-destructive infrastructure deployment
 
-The deployment scripts avoid unnecessary `CREATE OR REPLACE STORAGE INTEGRATION`. Snowflake documents that replacing a storage integration changes its hidden identity and can break stage associations. `CREATE OR ALTER` is used where supported to make warehouse objects and stages safer to redeploy. citeturn1search0turn1search2turn2search1
+The deployment scripts avoid unnecessary `CREATE OR REPLACE STORAGE INTEGRATION`. Snowflake documents that replacing a storage integration changes its hidden identity and can break stage associations. `CREATE OR ALTER` is used where supported to make warehouse objects and stages safer to redeploy.
 
 ### 3. RAW is source-aligned
 
@@ -127,7 +127,7 @@ Run the SQL files in this order:
 
 ### AWS prerequisite
 
-Create an IAM role that trusts the Snowflake-generated identity and grants the minimum required S3 read permissions for the `s3://euro-retails/raw/` prefix. Snowflake documents `s3:GetBucketLocation`, `s3:GetObject`, `s3:GetObjectVersion`, and `s3:ListBucket` as the core read permissions. citeturn0search0turn0search4
+Create an IAM role that trusts the Snowflake-generated identity and grants the minimum required S3 read permissions for the `s3://euro-retails/raw/` prefix. Snowflake documents `s3:GetBucketLocation`, `s3:GetObject`, `s3:GetObjectVersion`, and `s3:ListBucket` as the core read permissions.
 
 ### Snowflake prerequisite
 
